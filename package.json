@@ -64,7 +64,7 @@
             "title": "Configuration for the Test Explorer extension",
             "properties": {
                 "gtestExplorer.executable": {
-                    "description": "The glob describing the location of your test executable (relative to the workspace folder)",
+                    "description": "Path to your test executable (relative to the workspace folder)",
                     "type": "string",
                     "scope": "resource"
                 },
@@ -78,7 +78,7 @@
                     "scope": "resource"
                 },
                 "gtestExplorer.cwd": {
-                    "description": "The working directory where mocha is run (relative to the workspace folder)",
+                    "description": "Working directory where the tests are run",
                     "type": "string",
                     "scope": "resource"
                 },
