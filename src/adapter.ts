@@ -41,9 +41,12 @@ export class GoogleTestAdapter implements TestAdapter {
 		}
 	}
 
-	async load(): Promise<TestSuiteInfo | undefined> {
+        async load(): Promise<TestSuiteInfo | undefined> {
 
-		const config = this.getConfiguration();
+                const config = this.getConfiguration();
+                const useQemu  = config.get<boolean>('useQemu') ?? false;
+                const qemuPath = config.get<string>('qemuPath')!;
+                const qemuArgs = config.get<string[]>('qemuArgs')!;
 
 		return await new Promise<TestSuiteInfo | undefined>((resolve, reject) => {
 
@@ -53,10 +56,14 @@ export class GoogleTestAdapter implements TestAdapter {
 				return;
 			}
 
-			execFile(executable, ['--gtest_list_tests'], (error, stdout, stderr) => {
-				if (error) {
-					reject(error);
-				} else {
+                        const cmdLoad  = useQemu ? qemuPath : executable;
+                        const argsLoad = useQemu
+                                ? [...qemuArgs, executable, '--gtest_list_tests']
+                                : ['--gtest_list_tests'];
+                        execFile(cmdLoad, argsLoad, (error, stdout, stderr) => {
+                                if (error) {
+                                        reject(error);
+                                } else {
 					let lines = stdout.split(/[\n\r]+/);
 					var allTestsSuite = this.makeSuite("AllTests", "AllTests");
 
@@ -78,9 +85,12 @@ export class GoogleTestAdapter implements TestAdapter {
 		});
 	}
 
-	async run(info: TestSuiteInfo | TestInfo): Promise<void> {
+        async run(info: TestSuiteInfo | TestInfo): Promise<void> {
 
-		const config = this.getConfiguration();
+                const config = this.getConfiguration();
+                const useQemu  = config.get<boolean>('useQemu') ?? false;
+                const qemuPath = config.get<string>('qemuPath')!;
+                const qemuArgs = config.get<string[]>('qemuArgs')!;
 
 		this.testStatesEmitter.fire(<TestSuiteEvent>{
 			type: 'suite',
@@ -114,10 +124,14 @@ export class GoogleTestAdapter implements TestAdapter {
 				resolve();
 				return;
 			}
-			this.runningTestProcess = execFile(
-				executable,
-				['--gtest_filter=' + filter, '--gtest_output=xml'],
-				exec_options,
+                        const cmdRun  = useQemu ? qemuPath : executable;
+                        const argsRun = useQemu
+                                ? [...qemuArgs, executable, `--gtest_filter=${filter}`, `--gtest_output=xml`]
+                                : [`--gtest_filter=${filter}`, `--gtest_output=xml`];
+                        this.runningTestProcess = execFile(
+                                cmdRun,
+                                argsRun,
+                                exec_options,
 				(error, stdout, stderr) => {
 					if (error) {
 						report_failure(reject, error);
