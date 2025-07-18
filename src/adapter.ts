@@ -60,7 +60,12 @@ export class GoogleTestAdapter implements TestAdapter {
                         const argsLoad = useQemu
                                 ? [...qemuArgs, executable, '--gtest_list_tests']
                                 : ['--gtest_list_tests'];
-                        execFile(cmdLoad, argsLoad, (error, stdout, stderr) => {
+                        const exec_options: ExecFileOptionsWithBufferEncoding = {
+                                cwd: this.getCwd(config),
+                                env: this.getEnv(config),
+                                encoding: 'buffer'
+                        };
+                        execFile(cmdLoad, argsLoad, exec_options, (error, stdout, stderr) => {
                                 if (error) {
                                         reject(error);
                                 } else {
