@@ -126,20 +126,27 @@ export class GoogleTestAdapter implements TestAdapter {
 			}
                         const cmdRun  = useQemu ? qemuPath : executable;
                         const argsRun = useQemu
-                                ? [...qemuArgs, executable, `--gtest_filter=${filter}`, `--gtest_output=xml`]
-                                : [`--gtest_filter=${filter}`, `--gtest_output=xml`];
+                                ? [...qemuArgs, executable, `--gtest_filter=${filter}`, `--gtest_output=xml:test_detail.xml`]
+                                : [`--gtest_filter=${filter}`, `--gtest_output=xml:test_detail.xml`];
+                        const test_details = path.resolve(this.getCwd(config), 'test_detail.xml');
+                        if (fs.existsSync(test_details)) {
+                                try {
+                                        fs.unlinkSync(test_details);
+                                } catch (err) {
+                                        console.warn(`Failed to remove existing test_detail.xml: ${err}`);
+                                }
+                        }
                         this.runningTestProcess = execFile(
                                 cmdRun,
                                 argsRun,
                                 exec_options,
-				(error, stdout, stderr) => {
-					if (error) {
-						report_failure(reject, error);
-					} else {
-						const test_details = path.resolve(this.getCwd(config), 'test_detail.xml');
-						if (!fs.existsSync(test_details)) {
-							reject("Test run did not generate any output.");
-						} else {
+                                (error, stdout, stderr) => {
+                                        if (error) {
+                                                report_failure(reject, error);
+                                        } else {
+                                                if (!fs.existsSync(test_details)) {
+                                                        reject("Test run did not generate any output.");
+                                                } else {
 
 							let parser = new xml2js.Parser();
 							fs.readFile(test_details, 'utf8', (err, data) => {
