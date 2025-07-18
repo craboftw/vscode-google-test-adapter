@@ -253,11 +253,11 @@ export class GoogleTestAdapter implements TestAdapter {
 
 		for (const prop in configEnv) {
 			const val = configEnv[prop];
-			if ((val === undefined) || (val === null)) {
-				delete resultEnv.prop;
-			} else {
-				resultEnv[prop] = String(val);
-			}
+                        if ((val === undefined) || (val === null)) {
+                                delete resultEnv[prop];
+                        } else {
+                                resultEnv[prop] = String(val);
+                        }
 		}
 
 		return resultEnv;

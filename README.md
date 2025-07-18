@@ -10,7 +10,7 @@ This extension allows you to run your [Google tests](https://github.com/google/g
 ## Configuration
 
 * `gtestExplorer.executable`: The relative path describing the location of your test executable (relative to the workspace folder)
-* `gtestExplorer.env`: Environment variables to be set when running the tests
+* `gtestExplorer.env`: Environment variables to be set when running the tests. Set a variable to `null` or `undefined` to remove it from the test environment.
 * `gtestExplorer.cwd`: The working directory where Google is run (relative to the workspace folder)
 * `gtestExplorer.useQemu`: Run Google tests under QEMU
 * `gtestExplorer.qemuPath`: QEMU executable path
