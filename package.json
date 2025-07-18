@@ -81,6 +81,27 @@
                     "description": "The working directory where mocha is run (relative to the workspace folder)",
                     "type": "string",
                     "scope": "resource"
+                },
+                "gtestExplorer.useQemu": {
+                    "description": "Run Google tests under QEMU",
+                    "type": "boolean",
+                    "default": false,
+                    "scope": "resource"
+                },
+                "gtestExplorer.qemuPath": {
+                    "description": "QEMU executable",
+                    "type": "string",
+                    "default": "qemu-system-arm",
+                    "scope": "resource"
+                },
+                "gtestExplorer.qemuArgs": {
+                    "description": "Arguments for QEMU before the test executable",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "default": ["-M", "versatilepb", "-m", "128M"],
+                    "scope": "resource"
                 }
             }
         }
