@@ -11,7 +11,9 @@ export class GoogleTestAdapter implements TestAdapter {
 	private readonly reloadEmitter = new vscode.EventEmitter<void>();
 	private readonly autorunEmitter = new vscode.EventEmitter<void>();
 
-	private runningTestProcess: ChildProcess | undefined;
+        private runningTestProcess: ChildProcess | undefined;
+        private fileWatchCallback: ((curr: fs.Stats, prev: fs.Stats) => void) | undefined;
+        private watchedExecutable: string | undefined;
 
 	get testStates(): vscode.Event<TestSuiteEvent | TestEvent> {
 		return this.testStatesEmitter.event;
@@ -29,17 +31,19 @@ export class GoogleTestAdapter implements TestAdapter {
 		public readonly workspaceFolder: vscode.WorkspaceFolder
 	) {
 
-		const config = this.getConfiguration();
-		const executable = this.getExecutable(config);
-		if (executable) {
-			fs.watchFile(executable, (curr, prev) => {
-				console.log(`the current mtime is: ${curr.mtime}`);
-				console.log(`the previous mtime was: ${prev.mtime}`);
+                const config = this.getConfiguration();
+                const executable = this.getExecutable(config);
+                if (executable) {
+                        this.watchedExecutable = executable;
+                        this.fileWatchCallback = (curr, prev) => {
+                                console.log(`the current mtime is: ${curr.mtime}`);
+                                console.log(`the previous mtime was: ${prev.mtime}`);
 
-				this.autorunEmitter.fire();
-			});
-		}
-	}
+                                this.autorunEmitter.fire();
+                        };
+                        fs.watchFile(executable, this.fileWatchCallback);
+                }
+        }
 
         async load(): Promise<TestSuiteInfo | undefined> {
 
@@ -217,11 +221,20 @@ export class GoogleTestAdapter implements TestAdapter {
 		throw new Error("Method not implemented.");
 	}
 
-	cancel(): void {
-		if (this.runningTestProcess) {
-			this.runningTestProcess.kill();
-		}
-	}
+        cancel(): void {
+                if (this.runningTestProcess) {
+                        this.runningTestProcess.kill();
+                }
+        }
+
+        dispose(): void {
+                if (this.watchedExecutable && this.fileWatchCallback) {
+                        fs.unwatchFile(this.watchedExecutable, this.fileWatchCallback);
+                        this.watchedExecutable = undefined;
+                        this.fileWatchCallback = undefined;
+                }
+                this.cancel();
+        }
 
 	private getConfiguration(): vscode.WorkspaceConfiguration {
 		return vscode.workspace.getConfiguration('gtestExplorer', this.workspaceFolder.uri);

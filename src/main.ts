@@ -24,13 +24,14 @@ export async function activate(context: vscode.ExtensionContext) {
 	
 		vscode.workspace.onDidChangeWorkspaceFolders((event) => {
 	
-			for (const workspaceFolder of event.removed) {
-				const adapter = registeredAdapters.get(workspaceFolder);
-				if (adapter) {
-					testExplorerExtension.exports.unregisterAdapter(adapter);
-					registeredAdapters.delete(workspaceFolder);
-				}
-			}
+                        for (const workspaceFolder of event.removed) {
+                                const adapter = registeredAdapters.get(workspaceFolder);
+                                if (adapter) {
+                                        testExplorerExtension.exports.unregisterAdapter(adapter);
+                                        adapter.dispose();
+                                        registeredAdapters.delete(workspaceFolder);
+                                }
+                        }
 	
 			for (const workspaceFolder of event.added) {
 				const adapter = new GoogleTestAdapter(workspaceFolder);
